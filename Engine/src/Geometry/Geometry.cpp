@@ -1,7 +1,7 @@
-#include <Anvil/Geometry.h>
+#include <Engine/Geometry.h>
 #include <iostream>
 
-namespace Anvil {
+namespace Engine {
 namespace Geometry {
 
 Face::Face(const BaseGeometry *geo, uint32_t p1, uint32_t p2, uint32_t p3)
@@ -75,4 +75,4 @@ void BaseGeometry::computeNormal(uint32_t point) {
 }
 
 } // namespace Geometry
-} // namespace Anvil
+} // namespace Engine

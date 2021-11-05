@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <memory>
 
-#include <Anvil/Application.h>
+#include <Engine/Application.h>
 
 namespace Engine {
 
@@ -56,11 +56,12 @@ void Application::centerWindow() {
 }
 
 Application::Application(int width, int height, int argc, char **argv)
-    : mWidth(width), mHeight(height) {
+    : mWidth(width),
+    mHeight(height),
+    mCamera{vec3(0, 3, 3), vec3(0, 1, 0), vec3(1, -3, -3)} {
 
   /************ CREATE WINDOW AND CONTEXT ***********/
   createWindow();
-  
   centerWindow();
 
   // Create context
@@ -69,17 +70,13 @@ Application::Application(int width, int height, int argc, char **argv)
 
   mRenderer = std::make_unique<Renderer>();
 
-  /************ CREATE CAMERA  ***********/
-  // We define the y axis as up
-  mCamera = std::unique_ptr<Camera>(
-      new Camera(vec3(0, 3, 3), vec3(0, 1, 0), vec3(1, -3, -3)));
   // Establish initial position for camera
   mWorldTranslation = glm::translate(
-      mat4(1.0f), float(mScale) * -glm::normalize(mCamera->getPos()));
+      mat4(1.0f), float(mScale) * -glm::normalize(mCamera.getPos()));
   mWorldTransform = mWorldTranslation * mWorldRotation;
 
   /************ INITIALIZE INPUT HANDLER ***********/
-  mInputHandler = std::unique_ptr<InputHandler>(new InputHandler(mWindow));
+  mInputHandler = std::make_unique<InputHandler>(mWindow);
 
   /************ SET INPUT CALLBACKS *************/
   mInputHandler->setScrollCallback([this](double xoff, double yoff) {
@@ -90,15 +87,13 @@ Application::Application(int width, int height, int argc, char **argv)
       mScale = 300.0f;
 
     mWorldTranslation = glm::translate(
-        mat4(1.0f), float(mScale) * -glm::normalize(mCamera->getPos()));
+        mat4(1.0f), float(mScale) * -glm::normalize(mCamera.getPos()));
     mWorldTransform = mWorldTranslation * mWorldRotation;
   });
 
   /************ INITIALIZE UI *************/
-
-  mUIManager = std::make_shared<UIManager>();
   // Init ImGui.
-  mUIManager->init(mWindow, /* glsl version */ "#version 330 core");
+  mUIManager.init(mWindow, /* glsl version */ "#version 330 core");
 }
 
 void Application::run() {
@@ -120,13 +115,13 @@ void Application::run() {
     mInputHandler->poll();
 
     // Draw UI.
-    mUIManager->drawFrame();
+    mUIManager.drawFrame();
 
     // Swap buffers
     glfwSwapBuffers(mWindow);
   } while (glfwWindowShouldClose(mWindow) == 0);
 
-  mUIManager->shutdown();
+  mUIManager.shutdown();
   glfwTerminate();
 }
 } // namespace Engine

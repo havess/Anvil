@@ -4,7 +4,7 @@
 #include <iostream>
 #include <sstream>
 
-#include <Anvil/Shader.h>
+#include <Engine/Shader.h>
 
 namespace Engine {
 
@@ -33,7 +33,6 @@ Shader::Shader(Shader::Info info)
   gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
   try {
-    std::cout << "vertex path " << std::filesystem::current_path() / std::filesystem::path(vertexPath) << std::endl; 
     // open files
     vShaderFile.open(std::filesystem::current_path() / std::filesystem::path(vertexPath));
     fShaderFile.open(fragmentPath.c_str());

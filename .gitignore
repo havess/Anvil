@@ -2,3 +2,5 @@ build
 .clang_format
 imgui.ini
 .vscode
+CMakeFiles
+Testing

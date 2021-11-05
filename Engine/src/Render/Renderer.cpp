@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include <Anvil/Application.h>
-#include <Anvil/Renderer.h>
-#include <Anvil/Log.h>
+#include <Engine/Application.h>
+#include <Engine/Renderer.h>
+#include <Engine/Log.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
@@ -154,7 +154,7 @@ void Renderer::renderLights(const Application &app,
     mLightShader->setMatrix("model", worldTransform * light.getModelMat());
     mLightShader->setMatrix("view", app.getViewMatrix());
     mLightShader->setMatrix("proj", app.getProjMatrix());
-    mLightShader->setVec3("viewPos", app.getCamera()->getPos());
+    mLightShader->setVec3("viewPos", app.getCamera().getPos());
     light.draw(app);
   }
 }

@@ -28,15 +28,15 @@ struct Material {
 /// on the screen :).
 class Renderable {
 public:
-  Renderable(sptr<Mesh> mesh, const Material &material, int shaderID,
+  Renderable(uptr<Mesh> mesh, const Material &material, int shaderID,
              sptr<Texture> texture = nullptr)
       : mMesh(std::move(mesh)), mMaterial(material),
         mTexture(std::move(texture)), mShaderID(shaderID) {}
 
-  inline sptr<Mesh> mesh() { return mMesh; }
+  inline Mesh &mesh() { return *mMesh; }
   inline const Material &material() { return mMaterial; }
   inline int shaderID() { return mShaderID; }
-  void bindCallback(std::function<void(Shader &)> cb) {
+  void bindCallback(std::function<void(Shader &, const Mesh &)> cb) {
     mPerObject = cb;
   }
   void draw(const Application &app, Shader &shader) {
@@ -44,19 +44,21 @@ public:
       glActiveTexture(GL_TEXTURE0);
       mTexture->bind();
     }
-    mPerObject(shader);
+
+    mPerObject(shader, *mMesh);
     mMesh->draw(app);
+
     if (mTexture) {
       glBindTexture(GL_TEXTURE_2D, 0);
     }
   }
 
 private:
-  sptr<Mesh> mMesh;
+  uptr<Mesh> mMesh;
   Material mMaterial;
   sptr<Texture> mTexture;
   int mShaderID;
-  std::function<void(Shader &)> mPerObject;
+  std::function<void(Shader &, const Mesh &)> mPerObject;
 };
 
 class Renderer {
@@ -68,19 +70,18 @@ public:
   void renderFrame(const Application &app, const mat4 &worldTransform);
   void addLight(const Application &app, sptr<Mesh> mesh, vec3 &colour);
 
-  void addRenderable(sptr<Renderable> renderable) {
-    mRenderGroups[renderable->shaderID()].push_back(renderable);
+  void addRenderable(uptr<Renderable> renderable) {
+    mRenderGroups[renderable->shaderID()].push_back(std::move(renderable));
   }
 
   template<typename M, typename ... Args>
-  RenderableHandle createRenderable(
+  Renderable *createRenderable(
     const Material &material,
     int shaderID,
     Args&& ... args) {
-    auto mesh = std::make_shared<M>(std::forward<Args>(args) ...);
-    auto renderable = std::make_shared<Renderable>(mesh, material, shaderID);
-    addRenderable(renderable);
-    return renderable;
+    auto mesh = std::make_unique<M>(std::forward<Args>(args) ...);
+    addRenderable(std::make_unique<Renderable>(std::move(mesh), material, shaderID));
+    return mRenderGroups[shaderID].back().get();
   }
 
   int createShader(const Shader::Info & shader_info) {
@@ -101,7 +102,7 @@ public:
     mRenderGroups[shaderID].clear();
   }
 
-  void removeRenderable(sptr<Renderable> renderable) {
+  void removeRenderable(uptr<Renderable> renderable) {
     auto &group = mRenderGroups[renderable->shaderID()];
     auto iter = std::find(group.begin(), group.end(), renderable);
     if (iter != group.end())
@@ -118,7 +119,7 @@ private:
   uptr<Shader> mDepthShader;
   std::unordered_map<int, uptr<Shader>> mShaders;
   /// Group of renderables by shaderID.
-  std::unordered_map<int, std::vector<sptr<Renderable>>> mRenderGroups;
+  std::unordered_map<int, std::vector<uptr<Renderable>>> mRenderGroups;
   std::vector<sptr<Mesh>> mLights;
   std::vector<uint> mLightFBOs;
   std::vector<uint> mLightDepthCubeMaps;

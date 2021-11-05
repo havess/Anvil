@@ -12,8 +12,9 @@ public:
   Camera(vec3 position, vec3 up, vec3 front)
       : mPos(position), mUp(up), mFront(front), mRight(glm::cross(front, up)) {}
 
-  inline const vec3 &getPos() const { return mPos; }
+  inline const vec3 &getPos() const noexcept { return mPos; }
 
+  /// I think this might throw with some vector values.
   inline mat4 getViewMatrix() const { return glm::lookAt(mPos, mFront, mUp); }
 
 protected:

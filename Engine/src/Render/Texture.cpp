@@ -1,9 +1,9 @@
 #include <GL/gl3w.h>
 #include <iostream>
 
-#include <Anvil/Texture.h>
+#include <Engine/Texture.h>
 #define STB_IMAGE_IMPLEMENTATION
-#include <Anvil/stb_image.h>
+#include <Engine/stb_image.h>
 
 namespace Engine {
 
