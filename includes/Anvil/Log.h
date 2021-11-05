@@ -1,11 +1,11 @@
 #pragma once
 
+#include <GL/gl3w.h>
 #include <iostream>
 #include <string>
 #include <vector>
-#include "imgui/imgui.h"
-#include <GL/glew.h>
-namespace Anvil {
+#include <imgui/imgui.h>
+namespace Engine {
 class Log {
 public:
   enum class Category { Debug, Error, Info };
@@ -30,21 +30,21 @@ private:
   bool mAutoScroll;
   bool mScrollToBottom;
 };
-} // namespace Anvil
+} // namespace Engine
 
 #define LOG_ERROR(fmt, ...)                                                    \
-  Anvil::Log::getInstance().addLog(Anvil::Log::Category::Error, __FILE__, fmt, \
-                                   ##__VA_ARGS__);
+  Engine::Log::getInstance().addLog(Engine::Log::Category::Error, __FILE__,    \
+                                    fmt, ##__VA_ARGS__);
 
 #define LOG_INFO(fmt, ...)                                                     \
-  Anvil::Log::getInstance().addLog(Anvil::Log::Category::Info, __FILE__, fmt,  \
-                                   ##__VA_ARGS__);
+  Engine::Log::getInstance().addLog(Engine::Log::Category::Info, __FILE__,     \
+                                    fmt, ##__VA_ARGS__);
 
 #define LOG_DEBUG(fmt, ...)                                                    \
-  Anvil::Log::getInstance().addLog(Anvil::Log::Category::Debug, __FILE__, fmt, \
-                                   ##__VA_ARGS__);
+  Engine::Log::getInstance().addLog(Engine::Log::Category::Debug, __FILE__,    \
+                                    fmt, ##__VA_ARGS__);
 
-namespace Anvil {
+namespace Engine {
 inline void _check_gl_error() {
   GLenum err(glGetError());
 
@@ -72,4 +72,4 @@ inline void _check_gl_error() {
     err = glGetError();
   }
 }
-} // namespace Anvil
+} // namespace Engine

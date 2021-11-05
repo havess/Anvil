@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Anvil/Types.h"
+#include "Types.h"
 
 #include <set>
 #include <unordered_map>
@@ -50,14 +50,6 @@ public:
 
   inline const vec3 &getPos() const { return mPos; }
   inline const vec3 &getNormal() const { return mNormal; }
-
-  Point operator*(const Point &that) const {
-    return Point{this->mPos * that.mPos};
-  }
-
-  Point operator/(const Point &that) const {
-    return Point{this->mPos / that.mPos};
-  }
 
   Point operator+(const Point &that) const {
     return Point{this->mPos + that.mPos};

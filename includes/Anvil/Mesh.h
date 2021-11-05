@@ -1,123 +1,168 @@
 #pragma once
 #include <iostream>
+#include <set>
+#include <unordered_map>
 #include <vector>
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
+#include <GL/gl3w.h>
+#include <glfw/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "Geometry.h"
 #include "Shader.h"
-#include "Texture.h"
 #include "Types.h"
 
-namespace Anvil {
+namespace Engine {
 
-class Window;
+class Application;
+class Mesh;
 
-/// Err I'm not really sure if this is the best way to do this
-/// We want points to be the stuff handled from a geometric perspective
-/// and vertices to be what contains attribute information for OpenGL
-/// VertexData will be the barebones struct that holds all the data needed
-/// for OpenGL
+/// Face is the representation of a triangle in 3 space.
+/// faces might have a normal for geometric computation
+/// Each face has a list of point IDs which should be
+/// provide in CCW order according to the normal
+class Face {
+public:
+  Face(const Mesh *geo, unsigned int p1, unsigned int p2, unsigned int p3);
+  virtual ~Face() = default;
+
+  inline const vec3 &getNormal() const { return mNormal; }
+  inline void flipNormal() { mNormal = -mNormal; }
+  inline const std::tuple<uint32_t, uint32_t, uint32_t> getPoints() const {
+    return std::make_tuple(mPointIDs[0], mPointIDs[1], mPointIDs[2]);
+  }
+
+private:
+  const Mesh *mGeo;
+  vec3 mNormal;
+  uint32_t mPointIDs[3];
+};
+
+/// A point is a simple representation of a position in 3 space and should
+/// be what we use when manipulating geometry
+class Point {
+public:
+  Point(const vec3 &pos);
+  Point(const vec3 &pos, const vec2 &uv);
+  Point(float x, float y, float z);
+
+  void setPos(const vec3 &pos);
+  void setNormal(const vec3 &normal);
+  void setUV(const vec2 *uv);
+
+  inline const vec3 &getPos() const { return mPos; }
+  inline const vec3 &getNormal() const { return mNormal; }
+  inline const vec2 &getUV() const { return mUV; }
+
+  Point operator*(const Point &that) const {
+    return Point{this->mPos * that.mPos};
+  }
+
+  Point operator/(const Point &that) const {
+    return Point{this->mPos / that.mPos};
+  }
+
+  Point operator+(const Point &that) const {
+    return Point{this->mPos + that.mPos};
+  }
+
+  Point operator-(const Point &that) const {
+    return Point{this->mPos - that.mPos};
+  }
+
+private:
+  vec3 mPos;
+  vec3 mNormal;
+  vec2 mUV;
+};
+
 struct VertexData {
   vec3 mPos;
   vec3 mNormal;
+  vec2 mTextureCoord;
 };
 
 /// Vertex is what will be interfaced with to update attributes in VertexData
-class Vertex : public Geometry::PointListener {
+class Vertex {
 public:
-  Vertex(const Geometry::Point &p, VertexData &vertexData,
-         const Geometry::Face &f, bool isSmooth)
-      : mPoint(p), mFace(f), mData(vertexData), mIsSmooth(isSmooth) {
-    update();
-  }
+  Vertex(const Mesh *mesh, size_t point, VertexData vertexData, size_t face);
   virtual ~Vertex() = default;
 
-  void update() override {
-    mData.mPos = mPoint.getPos();
-    mData.mNormal = mIsSmooth ? mPoint.getNormal() : mFace.getNormal();
-  }
   inline const VertexData &getData() { return mData; }
 
 private:
-  const Geometry::Point &mPoint;
-  const Geometry::Face &mFace;
-  VertexData &mData;
-  bool mIsSmooth;
+  size_t mPoint;
+  size_t mFace;
+  VertexData mData;
 };
 
-struct Attribute {
-  uint32_t mSize;
-  std::string mDesc;
-};
+class Mesh {
+  friend Vertex;
 
-class Mesh : public Geometry::BaseGeometry {
 public:
-  Mesh(const std::string &texPath = "", bool smooth = false);
+  Mesh(const std::string &name, GLenum mode);
   virtual ~Mesh() = default;
-  void addAttribute(Attribute &att);
-  void draw(const Window &window, Shader &shader);
-  void addPoint(const vec3 &pos);
-  void addFace(uint32_t a, uint32_t b, uint32_t c);
-  void addFace(std::tuple<uint32_t, uint32_t, uint32_t>);
-  void removeFaces(size_t low, size_t high);
+  void draw(const Application &app);
+  void finalize(bool updateVertexData = true);
 
-  // TODO: this is just to see if textures work, obviously bad
-  inline void bindTexture() {
-    if (nullptr == mTexture) {
-      return;
-    }
-    mTexture->bind();
+  inline void setPoints(const std::vector<Point> &points) { mPoints = points; }
+  inline void setIndices(const std::vector<uint32_t> &indices) {
+    mIndices = indices;
   }
+  inline void flipNormals() {
+    for (auto &f : mFaces)
+      f.flipNormal();
+    finalize();
+  }
+  inline size_t getNumPoints() const { return mPoints.size(); }
+  inline size_t getNumFaces() const { return mFaces.size(); }
+  inline const Point &getPoint(uint32_t index) const { return mPoints[index]; }
+  inline const Face &getFace(uint32_t index) const { return mFaces[index]; }
+  inline const mat4 &getModelMat() const { return mModelMat; }
+  inline const mat4 &getScaleMat() const { return mScaleMat; }
+  inline void setModelMat(const mat4 &mat) {
+    mModelMat = mat * mTranslateMat * mRotateMat * mScaleMat;
+  }
+  inline mat4 getUnscaledMat() const { return mTranslateMat * mRotateMat; }
+  inline const std::string &name() const { return mName; }
 
-  inline void setVAO(GLuint vao) { mVAO = vao; }
-  inline GLuint getVAO() const { return mVAO; }
-  inline void setVBO(GLuint vbo) { mVBO = vbo; }
-  inline GLuint getVBO() const { return mVBO; }
-  inline void setEBO(GLuint ebo) { mEBO = ebo; }
-  inline GLuint getEBO() const { return mEBO; }
-  inline void setTexCoordBO(GLuint tcbo) { mTexCoordBO = tcbo; }
-  inline void setNormalBO(GLuint nbo) { mNormalBO = nbo; }
-  inline void setIndexBO(GLuint ibo) { mIndexBO = ibo; }
   inline mat4 getModelMat() { return mModelMat; }
+  inline void resetModelMat() { mModelMat = mat4(1.0f); }
   inline void rotate(float degrees, const vec3 &axis) {
-    mModelMat = glm::rotate(mModelMat, glm::radians(degrees), axis);
+    mRotateMat = glm::rotate(mRotateMat, glm::radians(degrees), axis);
+    mModelMat = mTranslateMat * mRotateMat * mScaleMat;
   }
   inline void translate(const vec3 &vec) {
-    mModelMat = glm::translate(mModelMat, vec);
+    mTranslateMat = glm::translate(mTranslateMat, vec);
+    mModelMat = mTranslateMat * mRotateMat * mScaleMat;
   }
-  inline void scale(const vec3 &vec) { mModelMat = glm::scale(mModelMat, vec); }
+  inline void scale(const vec3 &vec) {
+    mScaleMat = glm::scale(mScaleMat, vec);
+    mModelMat = mTranslateMat * mRotateMat * mScaleMat;
+  }
+  inline void setScale(const vec3 &vec) {
+    mScaleMat = glm::scale(mat4(1.0), vec);
+    mModelMat = mTranslateMat * mRotateMat * mScaleMat;
+  }
 
-  inline void startBatchUpdate() { mBatchUpdate = true; }
-  inline void stopBatchUpdate() { mBatchUpdate = false; }
+  bool mAreNormalsFlipped = false;
 
 protected:
   std::vector<Vertex> mVertices;
   std::vector<uint32_t> mIndices;
+  std::vector<Point> mPoints;
+  std::vector<Face> mFaces;
+  mat4 mTranslateMat;
+  mat4 mScaleMat;
+  mat4 mRotateMat;
+  mat4 mModelMat;
 
 private:
-  void createVertex(uint32_t pointIndex, uint32_t faceIndex);
-  void refreshData();
-
+  std::string mName;
+  GLenum mMode;
   GLuint mVAO, mVBO, mEBO;
-  GLuint mTexCoordBO;
   GLuint mNormalBO;
   GLuint mIndexBO;
 
-  uint32_t mVertexBlockSize;
-
-  mat4 mModelMat;
-
-  sptr<Texture> mTexture;
-
-  std::vector<Attribute> mAttributes;
   std::vector<VertexData> mVertexData;
-  std::unordered_map<uint32_t, uint32_t> mPointToVertexData;
-
-  bool mBatchUpdate;
-  bool mIsSmooth;
 };
-} // namespace Anvil
+} // namespace Engine

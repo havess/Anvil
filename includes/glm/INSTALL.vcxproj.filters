@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\haves\dev\Anvil\includes\glm\CMakeFiles\757ad9982e7e1aaec39a109177bec603\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{138ABDC0-4556-3EFA-A558-82C32C33FD9A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

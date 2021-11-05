@@ -1,0 +1,4 @@
+build
+.clang_format
+imgui.ini
+.vscode

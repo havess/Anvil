@@ -4,7 +4,7 @@
 
 #include "Types.h"
 
-namespace Anvil {
+namespace Engine {
 
 class Texture {
 public:
@@ -16,4 +16,4 @@ private:
   unsigned char *mData;
   uint mTexture;
 };
-} // namespace Anvil
+} // namespace Engine

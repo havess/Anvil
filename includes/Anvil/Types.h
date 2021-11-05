@@ -10,5 +10,6 @@ template <typename T> using sptr = std::shared_ptr<T>;
 template <typename T> using uptr = std::unique_ptr<T>;
 
 using mat4 = glm::mat4;
+using vec4 = glm::vec4;
 using vec3 = glm::vec3;
 using vec2 = glm::vec2;

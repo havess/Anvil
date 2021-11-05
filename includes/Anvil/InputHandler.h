@@ -8,61 +8,78 @@
 
 #include "Camera.h"
 #include "Types.h"
+#include <imgui/imgui.h>
+#include <imgui/imgui_impl_glfw.h>
+#include <imgui/imgui_impl_opengl3.h>
 
+/********* HELPER FUNCTIONS *********/
 namespace {
+
+std::vector<std::function<void(int, int)>> keyCallbacks;
 std::function<void(double, double)> mouseCallback;
 std::function<void(double, double)> scrollCallback;
-bool isFirstMouse = true;
-double lastX;
-double lastY;
-void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
-  if (isFirstMouse) {
-    lastX = xpos;
-    lastY = ypos;
-    isFirstMouse = false;
-  }
-  float xoffset = xpos - lastX;
-  float yoffset = lastY - ypos;
+std::function<void(int, int)> buttonCallback;
 
-  lastX = xpos;
-  lastY = ypos;
-  mouseCallback(xoffset, yoffset);
+void key_callback(GLFWwindow *window, int key, int scancode, int action,
+                  int mods) {
+  for (auto &cb : keyCallbacks)
+    cb(key, action);
 }
+
+void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
+  if (!ImGui::IsAnyWindowHovered())
+    mouseCallback(xpos, ypos);
+}
+
 void scroll_callback(GLFWwindow *window, double x, double y) {
-  scrollCallback(x, y);
+  if (!ImGui::IsAnyWindowHovered())
+    scrollCallback(x, y);
 }
+
+void mouse_button_callback(GLFWwindow *window, int button, int action,
+                           int mods) {
+  if (!ImGui::IsAnyWindowHovered())
+    buttonCallback(button, action);
+}
+
 } // namespace
 
+namespace Engine {
+
+/// Input handeler/manager, allows callbacks to be added from anywhere in the
+/// codebase. Eliminates need for one very large input handler function.
 class InputHandler {
 public:
   InputHandler(GLFWwindow *window) : mWindow(window) {
-    // Ensure we can capture the escape key being pressed below
     glfwSetInputMode(mWindow, GLFW_STICKY_KEYS, GL_TRUE);
   };
-  inline void poll() { glfwPollEvents(); }
-  inline void processInput(float deltaTime, sptr<Camera> camera) {
-    if (glfwGetKey(mWindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-      glfwSetWindowShouldClose(mWindow, true);
 
-    if (glfwGetKey(mWindow, GLFW_KEY_W) == GLFW_PRESS)
-      camera->ProcessKeyboard(FORWARD, deltaTime);
-    if (glfwGetKey(mWindow, GLFW_KEY_S) == GLFW_PRESS)
-      camera->ProcessKeyboard(BACKWARD, deltaTime);
-    if (glfwGetKey(mWindow, GLFW_KEY_A) == GLFW_PRESS)
-      camera->ProcessKeyboard(LEFT, deltaTime);
-    if (glfwGetKey(mWindow, GLFW_KEY_D) == GLFW_PRESS)
-      camera->ProcessKeyboard(RIGHT, deltaTime);
+  inline void poll() { glfwPollEvents(); }
+
+  inline void addKeyCallback(std::function<void(int, int)> callback) {
+    keyCallbacks.push_back(callback);
+    glfwSetKeyCallback(mWindow, key_callback);
   }
-  inline bool getState(uint key) { return glfwGetKey(mWindow, key); }
+
+  inline bool getState(uint key) const { return glfwGetKey(mWindow, key); }
+
   inline void setMouseCallback(std::function<void(double, double)> callback) {
     mouseCallback = callback;
     glfwSetCursorPosCallback(mWindow, mouse_callback);
   }
+
   inline void setScrollCallback(std::function<void(double, double)> callback) {
     scrollCallback = callback;
     glfwSetScrollCallback(mWindow, scroll_callback);
   }
 
+  inline void setMouseButtonCallback(std::function<void(int, int)> callback) {
+    buttonCallback = callback;
+    glfwSetMouseButtonCallback(mWindow, mouse_button_callback);
+  }
+
 private:
   GLFWwindow *mWindow;
 };
+
+} // namespace Engine
