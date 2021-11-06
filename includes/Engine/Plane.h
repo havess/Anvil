@@ -23,5 +23,4 @@ private:
   vec3 mNormal;
   vec3 mP0, mP1;
 };
-
 } // namespace Engine

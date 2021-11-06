@@ -93,7 +93,7 @@ Shader::Shader(Shader::Info info)
   checkCompileErrors(mProgramID, "PROGRAM");
 
   glDeleteShader(vertex);
-  glDeleteShader(fragment);
+  glDeleteShader(fragment);  
   if (!geometryPath.empty())
     glDeleteShader(geometry);
 }
@@ -119,6 +119,14 @@ void Shader::setFloat(const std::string &name, float value) const {
 void Shader::setMatrix(const std::string &name, mat4 value) const {
   glUniformMatrix4fv(glGetUniformLocation(mProgramID, name.c_str()), 1,
                      GL_FALSE, &value[0][0]);
+}
+
+void Shader::setVec2(const std::string &name, const vec2 &value) const {
+  glUniform2fv(glGetUniformLocation(mProgramID, name.c_str()), 1, &value[0]);
+}
+
+void Shader::setVec2(const std::string &name, float x, float y) const {
+  glUniform2f(glGetUniformLocation(mProgramID, name.c_str()), x, y);
 }
 
 void Shader::setVec3(const std::string &name, const vec3 &value) const {
