@@ -10,7 +10,7 @@
 namespace Engine {
 
 /// Basic axis-aligned rectangular prism implemenation.
-class Box : public Mesh {
+class Box : public StandardMesh {
 public:
   /// The position of the box relates to the front right corner.
   Box(const vec3 &position, float length, float width, float height);

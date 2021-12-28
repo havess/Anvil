@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <string>
 
 #include "Types.h"
@@ -20,6 +21,7 @@ public:
 
   Shader(Shader::Info info);
   void use();
+  bool reload();
 
   // Uniform functions.
   void setBool(const std::string &name, bool value) const;
@@ -32,11 +34,13 @@ public:
   void setVec3(const std::string &name, float x, float y, float z) const;
   inline int id() const { return mID; }
 private:
-  void checkCompileErrors(unsigned int shader, std::string type);
+  bool compile();
+  bool checkCompileErrors(unsigned int shader, std::string type);
   uint mProgramID;
   std::function<void(Shader &)> mPerBind;
   // We use our own ID since we are not guaranteed monotonically increasing
   // program IDs from 0.
   int mID;
+  std::string mVertexPath, mFragmentPath, mGeometryPath;
 };
 } // namespace Engine

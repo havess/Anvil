@@ -8,7 +8,6 @@
 
 #include <Engine/Application.h>
 #include <Engine/Box.h>
-#include <Engine/Grid.h>
 #include <Engine/Mesh.h>
 #include <Engine/Renderer.h>
 #include <Engine/Sphere.h>
@@ -41,7 +40,7 @@ public:
       shader_id,
       vec3(0, 0, 0), 1.0f, 3);
  
-    auto cb = [this](Engine::Shader &shader, const Engine::Mesh &m) {
+    auto cb = [this](Engine::Shader &shader, const Engine::Sphere &m) {
           shader.setMatrix("model", mWorldTransform * m.getModelMat());
         };
     sphere->bindCallback(cb);
@@ -53,7 +52,7 @@ public:
       30, 30, 30
     );
 
-    auto bcb = [this](Engine::Shader &shader, const Engine::Mesh &m) {
+    auto bcb = [this](Engine::Shader &shader, const Engine::Box &m) {
           shader.setMatrix("model", m.getModelMat());
         };
     box->mesh().flipNormals();

@@ -5,7 +5,7 @@
 namespace Engine {
 static int numSpheres = 0;
 Sphere::Sphere(const vec3 &centre, float radius, uint8_t iter)
-    : Mesh("Sphere" + std::to_string(numSpheres++), GL_TRIANGLES),
+    : StandardMesh("Sphere" + std::to_string(numSpheres++), GL_TRIANGLES),
       mRadius(radius), mPosition(centre), mIterations(iter) {
   computeVertices();
 }
@@ -23,6 +23,15 @@ void Sphere::computeVertices() {
   // Normalize all the points onto the sphere surface.
   for (auto &v : points) {
     v.setPos(mPosition + mRadius * glm::normalize(v.getPos()));
+  }
+  for (int i = 0; i < points.size(); i += 3) {
+    vec3 a = points[i].getPos();
+    vec3 b = points[i+1].getPos();
+    vec3 c = points[i+2].getPos();
+    auto normal = glm::normalize(glm::cross(c - b, a - b));
+    points[i].setNormal(normal);
+    points[i+1].setNormal(normal);
+    points[i+2].setNormal(normal);
   }
 
   auto addFace = [&indices](std::tuple<uint32_t, uint32_t, uint32_t> tuple) {
@@ -90,7 +99,12 @@ void Sphere::computeVertices() {
     // Delete faces that got subdivided.
     indices.erase(indices.begin(), indices.begin() + n * 3);
   }
-  setPoints(points);
+  std::vector<StandardMeshData> data;
+  for (const auto &p : points) {
+    auto d = StandardMeshData{p.getPos(), p.getNormal(), p.getUV()};
+    data.push_back(d);
+  }
+  setVertexData(data);
   setIndices(indices);
   finalize();
 }

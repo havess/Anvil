@@ -4,7 +4,7 @@
 
 namespace Engine {
 
-class Plane : public Mesh {
+class Plane : public StandardMesh {
 public:
   /// Constructors build Plane with dimensions \p width x \p height.
   /// Create plane with \p normal and surface vector \p forward.

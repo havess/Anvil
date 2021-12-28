@@ -27,18 +27,18 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action,
 }
 
 void mouse_callback(GLFWwindow *window, double xpos, double ypos) {
-  if (!ImGui::IsAnyWindowHovered())
+  if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
     mouseCallback(xpos, ypos);
 }
 
 void scroll_callback(GLFWwindow *window, double x, double y) {
-  if (!ImGui::IsAnyWindowHovered())
+  if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
     scrollCallback(x, y);
 }
 
 void mouse_button_callback(GLFWwindow *window, int button, int action,
                            int mods) {
-  if (!ImGui::IsAnyWindowHovered())
+  if (!ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow))
     buttonCallback(button, action);
 }
 

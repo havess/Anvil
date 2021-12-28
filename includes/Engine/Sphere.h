@@ -10,7 +10,7 @@
 
 namespace Engine {
 
-class Sphere : public Mesh {
+class Sphere : public StandardMesh {
 public:
   Sphere(const vec3 &position, float radius, uint8_t iter);
 

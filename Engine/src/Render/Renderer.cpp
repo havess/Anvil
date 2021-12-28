@@ -91,7 +91,7 @@ void Renderer::renderFrame(const Application &app, const mat4 &worldMat) {
   _check_gl_error();
 } // namespace Engine
 
-void Renderer::addLight(const Application &app, sptr<Mesh> mesh, vec3 &colour) {
+/*void Renderer::addLight(const Application &app, sptr<Mesh> mesh, vec3 &colour) {
   auto light_shader_info = Shader::Info{
     "basicLighting_VS.glsl",
     "basicLighting_FS.glsl",
@@ -103,7 +103,7 @@ void Renderer::addLight(const Application &app, sptr<Mesh> mesh, vec3 &colour) {
 
   /******** Generate depth map FBO for this light ********/
 
-  unsigned int depthMapFBO;
+ /* unsigned int depthMapFBO;
   glGenFramebuffers(1, &depthMapFBO);
   // create depth cubemap texture
   unsigned int depthCubemap;
@@ -126,7 +126,7 @@ void Renderer::addLight(const Application &app, sptr<Mesh> mesh, vec3 &colour) {
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
   mLightFBOs.push_back(depthMapFBO);
   mLightDepthCubeMaps.push_back(depthCubemap);
-}
+}*/
 
 void Renderer::renderGeometry(const Application &app,
                               const mat4 &worldTransform,
@@ -144,7 +144,7 @@ void Renderer::renderGeometry(const Application &app,
   }
 }
 
-void Renderer::renderLights(const Application &app,
+/*void Renderer::renderLights(const Application &app,
                             const mat4 &worldTransform) {
   // Draw the lights mesh representations. For now we leave these as "hidden"
   // renderables. TODO
@@ -157,5 +157,5 @@ void Renderer::renderLights(const Application &app,
     mLightShader->setVec3("viewPos", app.getCamera().getPos());
     light.draw(app);
   }
-}
+}*/
 } // namespace Engine

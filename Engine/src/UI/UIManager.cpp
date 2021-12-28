@@ -13,6 +13,7 @@ void UIManager::init(GLFWwindow *window, const std::string &glsl_version) {
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init("#version 130");
   ImGuiIO &io = ImGui::GetIO();
+  io.FontGlobalScale = 2.1f;
   (void)io;
 }
 
@@ -30,8 +31,8 @@ void UIManager::drawFrame() {
   static bool show_demo = false;
   if (ImGui::BeginMainMenuBar()) {
     if (ImGui::BeginMenu("View")) {
-      if (ImGui::MenuItem("Log", "", &show_log)) {
-      }
+      if (ImGui::MenuItem("Demo Window", "", &show_demo)) {}
+      if (ImGui::MenuItem("Log", "", &show_log)) {}
       for (auto &p : mShowWidget) {
         if (ImGui::MenuItem(p.first.c_str(), "", &p.second)) {
         }

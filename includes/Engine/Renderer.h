@@ -11,7 +11,15 @@
 #include <algorithm>
 #include <functional>
 #include <map>
+#include <type_traits>
 #include <vector>
+
+namespace {
+  template<typename T> struct is_mesh : public std::false_type {};
+
+  template<typename D, typename... Types>
+  struct is_mesh<Engine::Mesh<D, Types...>> : public std::true_type {};
+}
 
 namespace Engine {
 
@@ -24,22 +32,28 @@ struct Material {
   float sheen;
 };
 
+class RenderInterface {
+  public:
+    virtual void draw(const Application &app, Shader &shader) = 0;
+};
+
 /// Encapsulation of shader, material, and mesh which allow us to show something
 /// on the screen :).
-class Renderable {
+template<typename T>
+class Renderable : public RenderInterface {
 public:
-  Renderable(uptr<Mesh> mesh, const Material &material, int shaderID,
+  Renderable(uptr<T> mesh, const Material &material, int shaderID,
              sptr<Texture> texture = nullptr)
       : mMesh(std::move(mesh)), mMaterial(material),
         mTexture(std::move(texture)), mShaderID(shaderID) {}
 
-  inline Mesh &mesh() { return *mMesh; }
+  inline T &mesh() { return *mMesh; }
   inline const Material &material() { return mMaterial; }
   inline int shaderID() { return mShaderID; }
-  void bindCallback(std::function<void(Shader &, const Mesh &)> cb) {
+  void bindCallback(std::function<void(Shader &, const T &)> cb) {
     mPerObject = cb;
   }
-  void draw(const Application &app, Shader &shader) {
+  void draw(const Application &app, Shader &shader) override {
     if (mTexture) {
       glActiveTexture(GL_TEXTURE0);
       mTexture->bind();
@@ -54,34 +68,34 @@ public:
   }
 
 private:
-  uptr<Mesh> mMesh;
+  uptr<T> mMesh;
   Material mMaterial;
   sptr<Texture> mTexture;
   int mShaderID;
-  std::function<void(Shader &, const Mesh &)> mPerObject;
+  std::function<void(Shader &, const T &)> mPerObject;
 };
 
 class Renderer {
 public:
-  using RenderableHandle = std::weak_ptr<Renderable>;
-
   Renderer();
   virtual ~Renderer() = default;
   void renderFrame(const Application &app, const mat4 &worldTransform);
-  void addLight(const Application &app, sptr<Mesh> mesh, vec3 &colour);
+  //void addLight(const Application &app, sptr<Mesh> mesh, vec3 &colour);
 
-  void addRenderable(uptr<Renderable> renderable) {
-    mRenderGroups[renderable->shaderID()].push_back(std::move(renderable));
+  void addRenderable(int renderGroup, uptr<RenderInterface> renderable) {
+    mRenderGroups[renderGroup].push_back(std::move(renderable));
   }
 
   template<typename M, typename ... Args>
-  Renderable *createRenderable(
+  Renderable<M> *createRenderable(
     const Material &material,
     int shaderID,
     Args&& ... args) {
     auto mesh = std::make_unique<M>(std::forward<Args>(args) ...);
-    addRenderable(std::make_unique<Renderable>(std::move(mesh), material, shaderID));
-    return mRenderGroups[shaderID].back().get();
+    uptr<Renderable<M>> renderable = std::make_unique<Renderable<M>>(std::move(mesh), material, shaderID);
+    int id = renderable->shaderID();
+    addRenderable(id, std::move(renderable));
+    return dynamic_cast<Renderable<M>*>(mRenderGroups[shaderID].back().get());
   }
 
   int createShader(const Shader::Info & shader_info) {
@@ -102,7 +116,8 @@ public:
     mRenderGroups[shaderID].clear();
   }
 
-  void removeRenderable(uptr<Renderable> renderable) {
+  template<typename T>
+  void removeRenderable(uptr<Renderable<T>> renderable) {
     auto &group = mRenderGroups[renderable->shaderID()];
     auto iter = std::find(group.begin(), group.end(), renderable);
     if (iter != group.end())
@@ -112,15 +127,15 @@ public:
 private:
   void renderGeometry(const Application &app, const mat4 &worldTransform,
                       sptr<Shader> overrideShader = nullptr);
-  void renderLights(const Application &app, const mat4 &worldTransform);
+  //void renderLights(const Application &app, const mat4 &worldTransform);
   void renderText(const Application &app);
 
   uptr<Shader> mLightShader;
   uptr<Shader> mDepthShader;
   std::unordered_map<int, uptr<Shader>> mShaders;
   /// Group of renderables by shaderID.
-  std::unordered_map<int, std::vector<uptr<Renderable>>> mRenderGroups;
-  std::vector<sptr<Mesh>> mLights;
+  std::unordered_map<int, std::vector<uptr<RenderInterface>>> mRenderGroups;
+  //std::vector<sptr<Mesh>> mLights;
   std::vector<uint> mLightFBOs;
   std::vector<uint> mLightDepthCubeMaps;
   const uint mShadowWidth = 2048;
