@@ -1,6 +1,7 @@
 #pragma once
 #include "Mesh.h"
 #include "Camera.h"
+#include "Log.h"
 #include "Shader.h"
 #include "Types.h"
 #include "Texture.h"
@@ -42,6 +43,9 @@ class RenderInterface {
 template<typename T>
 class Renderable : public RenderInterface {
 public:
+  using Mesh = T;
+  Renderable(uptr<T> mesh)
+      : mMesh(std::move(mesh)) {}
   Renderable(uptr<T> mesh, const Material &material, int shaderID,
              sptr<Texture> texture = nullptr)
       : mMesh(std::move(mesh)), mMaterial(material),
@@ -50,6 +54,12 @@ public:
   inline T &mesh() { return *mMesh; }
   inline const Material &material() { return mMaterial; }
   inline int shaderID() { return mShaderID; }
+  void bindMaterial(const Material &material) {
+    mMaterial = material;
+  }
+  void bindShader(int shaderID) {
+    mShaderID = shaderID;
+  }
   void bindCallback(std::function<void(Shader &, const T &)> cb) {
     mPerObject = cb;
   }
@@ -60,7 +70,9 @@ public:
     }
 
     mPerObject(shader, *mMesh);
+    LOG_IF_GL_ERR();
     mMesh->draw(app);
+    LOG_IF_GL_ERR();
 
     if (mTexture) {
       glBindTexture(GL_TEXTURE_2D, 0);
@@ -82,8 +94,10 @@ public:
   void renderFrame(const Application &app, const mat4 &worldTransform);
   //void addLight(const Application &app, sptr<Mesh> mesh, vec3 &colour);
 
-  void addRenderable(int renderGroup, uptr<RenderInterface> renderable) {
+  template<typename M>
+  Renderable<M> *addRenderable(int renderGroup, uptr<RenderInterface> renderable) {
     mRenderGroups[renderGroup].push_back(std::move(renderable));
+    return dynamic_cast<Renderable<M>*>(mRenderGroups[renderGroup].back().get());
   }
 
   template<typename M, typename ... Args>
@@ -93,9 +107,7 @@ public:
     Args&& ... args) {
     auto mesh = std::make_unique<M>(std::forward<Args>(args) ...);
     uptr<Renderable<M>> renderable = std::make_unique<Renderable<M>>(std::move(mesh), material, shaderID);
-    int id = renderable->shaderID();
-    addRenderable(id, std::move(renderable));
-    return dynamic_cast<Renderable<M>*>(mRenderGroups[shaderID].back().get());
+    return addRenderable<M>(shaderID, std::move(renderable));
   }
 
   int createShader(const Shader::Info & shader_info) {

@@ -7,6 +7,7 @@ file(GLOB sources
 ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
 ${CMAKE_CURRENT_SOURCE_DIR}/src/imgui/*.cpp
+${CMAKE_CURRENT_SOURCE_DIR}/src/Gadgets/*.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/Geometry/*.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/Render/*.cpp
 ${CMAKE_CURRENT_SOURCE_DIR}/src/UI/*.cpp)

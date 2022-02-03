@@ -5,6 +5,7 @@
 #include <sstream>
 
 #include <Engine/Shader.h>
+#include <Engine/Log.h>
 
 namespace Engine {
 
@@ -20,6 +21,7 @@ Shader::Shader(Shader::Info info)
       mFragmentPath(std::move(info.fsPath)),
       mGeometryPath(std::move(info.gsPath)) {
   compile();
+  LOG_INFO("Shader COMPILED");
 }
 
 bool Shader::compile() {
@@ -34,7 +36,7 @@ bool Shader::compile() {
   try {
     // open files
     vShaderFile.open(std::filesystem::current_path() / std::filesystem::path(mVertexPath));
-    fShaderFile.open(mFragmentPath.c_str());
+    fShaderFile.open(std::filesystem::current_path() / std::filesystem::path(mFragmentPath));
     std::stringstream vShaderStream, fShaderStream;
     // read file's buffer contents into streams
     vShaderStream << vShaderFile.rdbuf();

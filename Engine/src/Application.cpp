@@ -58,7 +58,7 @@ void Application::centerWindow() {
 Application::Application(int width, int height, int argc, char **argv)
     : mWidth(width),
     mHeight(height),
-    mCamera{vec3(0, 3, 3), vec3(0, 1, 0), vec3(1, -3, -3)} {
+    mCamera(Engine::Camera{vec3(0, 3, 3), vec3(0, 1, 0), vec3(1, -3, -3)}) {
 
   /************ CREATE WINDOW AND CONTEXT ***********/
   createWindow();

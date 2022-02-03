@@ -6,7 +6,6 @@
 
 #include <Engine/Application.h>
 #include <Engine/Renderer.h>
-#include <Engine/Log.h>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/string_cast.hpp>
@@ -23,7 +22,7 @@ Renderer::Renderer() {
   glEnable(GL_DEPTH_CLAMP);
 
   glClearDepth(1.0f);
-  glClearColor(0.8f, 0.25f, 0.5f, 1.0f);
+  glClearColor(0.85f, 0.85f, 0.9f, 1.0f);
 
   /*********** CONFIGURE DEPTH BUFFER ************/
   auto depth_shader_info = Shader::Info{
@@ -81,14 +80,14 @@ void Renderer::renderFrame(const Application &app, const mat4 &worldMat) {
   //mDepthShader->setVec3("lightPos", lightPos);
   //renderGeometry(app, worldMat, mDepthShader);
   glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  _check_gl_error();
+  LOG_IF_GL_ERR();
   glViewport(0, 0, app.getFramebufferWidth(), app.getFramebufferHeight());
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //glActiveTexture(GL_TEXTURE1);
   //glBindTexture(GL_TEXTURE_CUBE_MAP, mLightDepthCubeMaps[0]);
   renderGeometry(app, worldMat);
   //renderLights(app, worldMat);
-  _check_gl_error();
+  LOG_IF_GL_ERR();
 } // namespace Engine
 
 /*void Renderer::addLight(const Application &app, sptr<Mesh> mesh, vec3 &colour) {
@@ -138,8 +137,10 @@ void Renderer::renderGeometry(const Application &app,
     auto &renderList = renderGroup.second;
     auto &shader = overrideShader ? *overrideShader : *mShaders[shaderID];
     shader.use();
+    LOG_IF_GL_ERR();
     for (auto &renderable : renderList) {
       renderable->draw(app, shader);
+      LOG_IF_GL_ERR();
     }
   }
 }

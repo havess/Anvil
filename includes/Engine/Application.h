@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 #include <GL/gl3w.h>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -23,23 +24,19 @@ public:
 
   Renderer &getRenderer() { return *mRenderer; }
   UIManager &getUI() { return mUIManager; }
-  inline const Camera &getCamera() const { return mCamera; }
+  inline void attachCamera(Camera &cam) { std::cout << "ATTACH CAMERA" << std::endl; mCamera = cam; }
   inline uint getWidth() const { return mWidth; }
   inline uint getHeight() const { return mHeight; }
   inline uint getFramebufferWidth() const { return mFramebufferWidth; }
   inline uint getFramebufferHeight() const { return mFramebufferHeight; }
   inline mat4 getViewMatrix() const { return mCamera.getViewMatrix(); }
-  inline mat4 getProjMatrix() const {
-    return glm::perspective(
-        glm::radians(45.0f),
-        (float)mFramebufferWidth / (float)mFramebufferHeight, 0.1f, 1000.0f);
-  }
+  inline mat4 getProjMatrix() const { return mCamera.getProjMatrix(*this); }
 
 protected:
   int mWidth, mHeight;
   int mFramebufferWidth, mFramebufferHeight;
   uptr<InputHandler> mInputHandler;
-  Camera mCamera;
+  Camera &mCamera;
   UIManager mUIManager;
   uptr<Renderer> mRenderer;
 

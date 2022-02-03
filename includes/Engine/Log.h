@@ -45,31 +45,41 @@ private:
                                     fmt, ##__VA_ARGS__);
 
 namespace Engine {
-inline void _check_gl_error() {
+inline bool _check_gl_error() {
   GLenum err(glGetError());
 
+  bool err_occured = err != GL_NO_ERROR;
   while (err != GL_NO_ERROR) {
     std::string error;
 
     switch (err) {
-    case GL_INVALID_OPERATION:
-      error = "GL_INVALID_OPERATION";
-      break;
-    case GL_INVALID_ENUM:
-      error = "GL_INVALID_ENUM";
-      break;
-    case GL_INVALID_VALUE:
-      error = "GL_INVALID_VALUE";
-      break;
-    case GL_OUT_OF_MEMORY:
-      error = "GL_OUT_OF_MEMORY";
-      break;
-    case GL_INVALID_FRAMEBUFFER_OPERATION:
-      error = "GL_INVALID_FRAMEBUFFER_OPERATION";
-      break;
+      case GL_INVALID_OPERATION:
+        error = "GL_INVALID_OPERATION";
+        break;
+      case GL_INVALID_ENUM:
+        error = "GL_INVALID_ENUM";
+        break;
+      case GL_INVALID_VALUE:
+        error = "GL_INVALID_VALUE";
+        break;
+      case GL_OUT_OF_MEMORY:
+        error = "GL_OUT_OF_MEMORY";
+        break;
+      case GL_INVALID_FRAMEBUFFER_OPERATION:
+        error = "GL_INVALID_FRAMEBUFFER_OPERATION";
+        break;
+      default:
+        LOG_ERROR("Unkown GL Error %d\n", err);
+        continue;
     }
-    LOG_ERROR("Test %d\n", 1);
+    LOG_ERROR("GL Error: %s\n", error.c_str());
+    
     err = glGetError();
   }
+  return err_occured;
 }
 } // namespace Engine
+
+#define LOG_IF_GL_ERR(fmt, ...)  \
+  if(Engine::_check_gl_error())  \
+    LOG_ERROR("GL Error occured at line : %d", __LINE__);

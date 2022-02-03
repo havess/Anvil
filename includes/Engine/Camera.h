@@ -1,27 +1,37 @@
 #pragma once
-
-#include <glfw/glfw3.h>
 #include "Types.h"
 
-#include <vector>
 namespace Engine {
 
 /// Basic Camera implementation.
+class Application;
 class Camera {
 public:
-  Camera(vec3 position, vec3 up, vec3 front)
-      : mPos(position), mUp(up), mFront(front), mRight(glm::cross(front, up)) {}
+  Camera(vec3 position, vec3 up, vec3 front);
 
+  void setPos(vec3 pos) noexcept { mPos = pos; }
   inline const vec3 &getPos() const noexcept { return mPos; }
 
-  /// I think this might throw with some vector values.
-  inline mat4 getViewMatrix() const { return glm::lookAt(mPos, mFront, mUp); }
+  virtual mat4 getViewMatrix() const;
+  virtual mat4 getProjMatrix(const Application &app) const;
 
 protected:
   vec3 mPos;
   vec3 mFront;
   vec3 mUp;
   vec3 mRight;
+};
+
+class OrthoCamera : public Camera {
+public:
+  OrthoCamera(vec3 position, vec3 up, vec3 front, float width, float height);
+
+  mat4 getViewMatrix() const override;
+  mat4 getProjMatrix(const Application &app) const override;
+
+private:
+  float mWidth;
+  float mHeight;
 };
 
 } // namespace Engine
