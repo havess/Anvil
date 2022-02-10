@@ -1,4 +1,3 @@
-#include <GL/gl3w.h>
 #include <iostream>
 
 #include <Engine/Texture.h>
@@ -8,7 +7,7 @@
 namespace Engine {
 
 Texture::Texture(const std::string &path) {
-  glGenTextures(1, &mTexture);
+  /*glGenTextures(1, &mTexture);
   glBindTexture(GL_TEXTURE_2D, mTexture);
   // set the texture wrapping/filtering options (on the currently bound
   // texture object)
@@ -27,9 +26,11 @@ Texture::Texture(const std::string &path) {
     std::cerr << "Failed to load texture" << std::endl;
     std::cerr << stbi_failure_reason() << std::endl;
   }
-  stbi_image_free(mData);
+  stbi_image_free(mData);*/
 }
 
-void Texture::bind() { glBindTexture(GL_TEXTURE_2D, mTexture); }
+void Texture::bind() { 
+  //glBindTexture(GL_TEXTURE_2D, mTexture);
+}
 
 } // namespace Engine

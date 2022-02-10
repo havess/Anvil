@@ -4,18 +4,20 @@
 #include <unordered_map>
 #include <vector>
 
-#include <GL/gl3w.h>
+#include <vulkan/vulkan.hpp>
 #include <glfw/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Log.h"
 #include "Shader.h"
 #include "Types.h"
 
 namespace {
-  void bindGLAttrib(int index, int numElements, GLenum type, int stride, int offset) {
-    glVertexAttribPointer(index, numElements, type, GL_FALSE, stride,
-                        (void *)(offset));
-    glEnableVertexAttribArray(index);
+  void bindGLAttrib(int index, int numElements, int type, int stride, int offset) {
+    //glVertexAttribPointer(index, numElements, type, GL_FALSE, stride,
+    //                    (void *)(offset));
+    //glEnableVertexAttribArray(index);
+    LOG_ERROR("bindGLAttrib is not implemented");
   }
 
   template<typename T>
@@ -25,25 +27,25 @@ namespace {
 
   template<>
   void bindType<int>(int index, int stride, int& offset) {
-    bindGLAttrib(index, 1, GL_INT, stride, offset);
+    bindGLAttrib(index, 1, 0 /* GL_INT */, stride, offset);
     offset += sizeof(int);
   }
 
   template<>
   void bindType<float>(int index, int stride, int& offset) {
-    bindGLAttrib(index, 1, GL_FLOAT, stride, offset);
+    bindGLAttrib(index, 1, 0 /* GL_FLOAT */, stride, offset);
     offset += sizeof(float);
   }
 
   template<>
   void bindType<vec2>(int index, int stride, int& offset) {
-    bindGLAttrib(index, 2, GL_FLOAT, stride, offset);
+    bindGLAttrib(index, 2, 0 /* GL_FLOAT */, stride, offset);
     offset += 2*sizeof(float);
   }
 
   template<>
   void bindType<vec3>(int index, int stride, int& offset) {
-    bindGLAttrib(index, 3, GL_FLOAT, stride, offset);
+    bindGLAttrib(index, 3, 0 /* GL_FLOAT */, stride, offset);
     offset += 3*sizeof(float);
   }
 
@@ -135,34 +137,34 @@ class Mesh {
 public:
   Mesh(const std::string &name, GLenum mode) : mName(name), mMode(mode) {
       mModelMat = mat4(1.0f);
-    glGenVertexArrays(1, &mVAO);
-    glBindVertexArray(mVAO);
-    glGenBuffers(1, &mVBO);
-    glGenBuffers(1, &mEBO);
+    //glGenVertexArrays(1, &mVAO);
+    //glBindVertexArray(mVAO);
+    //glGenBuffers(1, &mVBO);
+    //glGenBuffers(1, &mEBO);
   }
   virtual ~Mesh() = default;
   void draw(const Application &app) {
-    glBindVertexArray(mVAO);
+    //glBindVertexArray(mVAO);
 
     // if we provided indices, do an indexed draw.
     if (!mIndices.empty()) {
-      glDrawElements(mMode, mIndices.size(), GL_UNSIGNED_INT, 0);
+      //glDrawElements(mMode, mIndices.size(), GL_UNSIGNED_INT, 0);
     } else {
-      glDrawArrays(mMode, 0, mVertexData.size());
+      //glDrawArrays(mMode, 0, mVertexData.size());
     }
 
-    glBindVertexArray(0);
+    //glBindVertexArray(0);
   }
   void finalize(bool updateVertexData = true) {
-    glBindVertexArray(mVAO);
-    glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-    glBufferData(GL_ARRAY_BUFFER, mVertexData.size() * sizeof(Data),
-                &mVertexData[0], GL_STATIC_DRAW);
+    //glBindVertexArray(mVAO);
+    //glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+    //glBufferData(GL_ARRAY_BUFFER, mVertexData.size() * sizeof(Data),
+    //            &mVertexData[0], GL_STATIC_DRAW);
 
     if (!mIndices.empty()) {
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-      glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(uint32_t),
-                  &mIndices[0], GL_STATIC_DRAW);
+      //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
+      //glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(uint32_t),
+      //            &mIndices[0], GL_STATIC_DRAW);
     }
 
     int offset = 0;
@@ -221,10 +223,10 @@ protected:
 
 private:
   std::string mName;
-  GLenum mMode;
-  GLuint mVAO, mVBO, mEBO;
-  GLuint mNormalBO;
-  GLuint mIndexBO;
+  int mMode;
+  int mVAO, mVBO, mEBO;
+  int mNormalBO;
+  int mIndexBO;
 
   std::vector<Data> mVertexData;
 };

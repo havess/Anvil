@@ -15,14 +15,14 @@ Renderer::Renderer() {
   // glEnable(GL_CULL_FACE);
   // glCullFace(GL_BACK);
   // glFrontFace(GL_CW);
-  glEnable(GL_DEPTH_TEST);
+  /*glEnable(GL_DEPTH_TEST);
   glDepthMask(GL_TRUE);
   glDepthFunc(GL_LEQUAL);
   glDepthRange(0.0f, 1.0f);
   glEnable(GL_DEPTH_CLAMP);
 
   glClearDepth(1.0f);
-  glClearColor(0.85f, 0.85f, 0.9f, 1.0f);
+  glClearColor(0.85f, 0.85f, 0.9f, 1.0f);*/
 
   /*********** CONFIGURE DEPTH BUFFER ************/
   auto depth_shader_info = Shader::Info{
@@ -32,8 +32,8 @@ Renderer::Renderer() {
 }
 
 void Renderer::renderFrame(const Application &app, const mat4 &worldMat) {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glEnable(GL_DEPTH_TEST);
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //glEnable(GL_DEPTH_TEST);
 
   // 0. create depth cubemap transformation matrices
   // -----------------------------------------------
@@ -79,15 +79,15 @@ void Renderer::renderFrame(const Application &app, const mat4 &worldMat) {
   //mDepthShader->setFloat("far_plane", far_plane);
   //mDepthShader->setVec3("lightPos", lightPos);
   //renderGeometry(app, worldMat, mDepthShader);
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  LOG_IF_GL_ERR();
-  glViewport(0, 0, app.getFramebufferWidth(), app.getFramebufferHeight());
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  //LOG_IF_GL_ERR();
+  //glViewport(0, 0, app.getFramebufferWidth(), app.getFramebufferHeight());
+  //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   //glActiveTexture(GL_TEXTURE1);
   //glBindTexture(GL_TEXTURE_CUBE_MAP, mLightDepthCubeMaps[0]);
   renderGeometry(app, worldMat);
   //renderLights(app, worldMat);
-  LOG_IF_GL_ERR();
+  //LOG_IF_GL_ERR();
 } // namespace Engine
 
 /*void Renderer::addLight(const Application &app, sptr<Mesh> mesh, vec3 &colour) {
@@ -137,10 +137,10 @@ void Renderer::renderGeometry(const Application &app,
     auto &renderList = renderGroup.second;
     auto &shader = overrideShader ? *overrideShader : *mShaders[shaderID];
     shader.use();
-    LOG_IF_GL_ERR();
+    //LOG_IF_GL_ERR();
     for (auto &renderable : renderList) {
       renderable->draw(app, shader);
-      LOG_IF_GL_ERR();
+      //LOG_IF_GL_ERR();
     }
   }
 }

@@ -1,13 +1,14 @@
 #pragma once
 #include <iostream>
-#include <GL/gl3w.h>
 #include <glm/gtc/matrix_transform.hpp>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 
 #include "Camera.h"
 #include "InputHandler.h"
 #include "Renderer.h"
 #include "Types.h"
-#include "UIManager.h"
+//#include "UIManager.h"
 
 struct GLFWwindow;
 namespace Engine {
@@ -23,8 +24,8 @@ public:
   virtual void tick(float deltaTime) {}
 
   Renderer &getRenderer() { return *mRenderer; }
-  UIManager &getUI() { return mUIManager; }
-  inline void attachCamera(Camera &cam) { std::cout << "ATTACH CAMERA" << std::endl; mCamera = cam; }
+  //UIManager &getUI() { return mUIManager; }
+  inline void attachCamera(Camera &cam) { mCamera = cam; }
   inline uint getWidth() const { return mWidth; }
   inline uint getHeight() const { return mHeight; }
   inline uint getFramebufferWidth() const { return mFramebufferWidth; }
@@ -37,7 +38,7 @@ protected:
   int mFramebufferWidth, mFramebufferHeight;
   uptr<InputHandler> mInputHandler;
   Camera &mCamera;
-  UIManager mUIManager;
+  //UIManager mUIManager;
   uptr<Renderer> mRenderer;
 
   float mScale = 25.0f;
@@ -51,7 +52,14 @@ protected:
 
 private:
   GLFWwindow *mWindow;
-  void createWindow();
+  VkInstance mInstance;
+
+  void initWindow();
+  void initVulkan();
+  void initEngine();
+  void cleanup();
+
+  void createInstance();
   void centerWindow();
 };
 

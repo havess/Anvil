@@ -16,6 +16,7 @@
 class Example : public Engine::Application {
 public:
   Example(int argc, char **argv) : Engine::Application(1800, 1000, argc, argv) {
+    /*
     // Get the renderer for this application.
     auto &renderer = getRenderer();
 
@@ -69,24 +70,24 @@ public:
     
     mInputHandler->addKeyCallback(key_cb);
     mInputHandler->setMouseButtonCallback(button_cb);
-    mInputHandler->setMouseCallback(mouse_cb);
+    mInputHandler->setMouseCallback(mouse_cb);*/
   }
 
   void tick(float deltaTime) override {
     // If we have let go of the mouse and we were moving as we did so, slowly
     // slow down the rotation.
-    if (!mMouseDown && mRotVel != 0.0f) {
+    /*if (!mMouseDown && mRotVel != 0.0f) {
       auto rads = glm::radians(mRotVel);
       mWorldRotation = glm::rotate(mWorldRotation, rads, vec3(0, 1, 0));
       mWorldTransform = mWorldTranslation * mWorldRotation;
       mRotVel += mRotVel < 0 ? 0.2f : -0.2f;
       if (abs(mRotVel) < 0.05)
         mRotVel = 0;
-    }
+    }*/
   }
 
 private:
-  void mouseCB(double xpos, double ypos) {
+  /*void mouseCB(double xpos, double ypos) {
     if (mMouseDown) {
       if (mFirstMouse) {
         mLastMouseXPos = int(xpos);
@@ -125,7 +126,7 @@ private:
   int   mLastMouseXPos;
   bool  mMouseDown = false;
   bool  mFirstMouse = true;
-  float mRotVel = 0.0f;
+  float mRotVel = 0.0f;*/
 };
 
 int main(int argc, char **argv) {

@@ -1,4 +1,3 @@
-#include <GL/gl3w.h>
 #include <fstream>
 #include <filesystem>
 #include <iostream>
@@ -59,7 +58,7 @@ bool Shader::compile() {
     std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ " << e.what() << std::endl;
   }
 
-  unsigned int vertex, fragment, geometry;
+  /*unsigned int vertex, fragment, geometry;
   bool success = true;
 
   vertex = glCreateShader(GL_VERTEX_SHADER);
@@ -98,11 +97,12 @@ bool Shader::compile() {
   if (!mGeometryPath.empty())
     glDeleteShader(geometry);
 
-  return success;
+  return success; */
+  return false;
 }
 
 void Shader::use() {
-  glUseProgram(mProgramID);
+  //glUseProgram(mProgramID);
   // Call function that is user defined at every bind.
   mPerBind(*this);
 }
@@ -112,40 +112,40 @@ bool Shader::reload() {
 }
 
 void Shader::setBool(const std::string &name, bool value) const {
-  glUniform1i(glGetUniformLocation(mProgramID, name.c_str()), (int)value);
+  //glUniform1i(glGetUniformLocation(mProgramID, name.c_str()), (int)value);
 }
 
 void Shader::setInt(const std::string &name, int value) const {
-  glUniform1i(glGetUniformLocation(mProgramID, name.c_str()), value);
+  //glUniform1i(glGetUniformLocation(mProgramID, name.c_str()), value);
 }
 
 void Shader::setFloat(const std::string &name, float value) const {
-  glUniform1f(glGetUniformLocation(mProgramID, name.c_str()), value);
+  //glUniform1f(glGetUniformLocation(mProgramID, name.c_str()), value);
 }
 
 void Shader::setMatrix(const std::string &name, mat4 value) const {
-  glUniformMatrix4fv(glGetUniformLocation(mProgramID, name.c_str()), 1,
-                     GL_FALSE, &value[0][0]);
+  //glUniformMatrix4fv(glGetUniformLocation(mProgramID, name.c_str()), 1,
+  //                   GL_FALSE, &value[0][0]);
 }
 
 void Shader::setVec2(const std::string &name, const vec2 &value) const {
-  glUniform2fv(glGetUniformLocation(mProgramID, name.c_str()), 1, &value[0]);
+  //glUniform2fv(glGetUniformLocation(mProgramID, name.c_str()), 1, &value[0]);
 }
 
 void Shader::setVec2(const std::string &name, float x, float y) const {
-  glUniform2f(glGetUniformLocation(mProgramID, name.c_str()), x, y);
+  //glUniform2f(glGetUniformLocation(mProgramID, name.c_str()), x, y);
 }
 
 void Shader::setVec3(const std::string &name, const vec3 &value) const {
-  glUniform3fv(glGetUniformLocation(mProgramID, name.c_str()), 1, &value[0]);
+  //glUniform3fv(glGetUniformLocation(mProgramID, name.c_str()), 1, &value[0]);
 }
 
 void Shader::setVec3(const std::string &name, float x, float y, float z) const {
-  glUniform3f(glGetUniformLocation(mProgramID, name.c_str()), x, y, z);
+  //glUniform3f(glGetUniformLocation(mProgramID, name.c_str()), x, y, z);
 }
 
 bool Shader::checkCompileErrors(unsigned int shader, std::string type) {
-  int success;
+  /*int success;
   char infoLog[1024];
   if (type != "PROGRAM") {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -168,6 +168,7 @@ bool Shader::checkCompileErrors(unsigned int shader, std::string type) {
           << std::endl;
     }
   }
-  return success;
+  return success;*/
+  return false;
 }
 } // namespace Engine

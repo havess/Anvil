@@ -7,11 +7,14 @@ message(STATUS "GLFW3 included at ${GLFW3_INCLUDE_DIR} with lib at ${GLFW3_LIBRA
 find_package(GLM REQUIRED)
 message(STATUS "GLM included at ${GLM_INCLUDE_DIR}")
 
-set(LIBS glfw3 opengl32 Engine)
+find_package(Vulkan REQUIRED FATAL_ERROR)
+message(STATUS "Vulkan included at ${Vulkan_FOUND} ${Vulkan_LIBRARY}")
+
+set(LIBS glfw3 vulkan-1 Engine)
 
 set(APP_NAME Basic)
 include_directories(../../includes)
-link_directories(../../lib)
+link_directories(../../lib ${Vulkan_LIBRARY}/../)
 add_executable(${APP_NAME} main.cpp)
 set_target_properties(${APP_NAME} PROPERTIES
             CXX_STANDARD 17

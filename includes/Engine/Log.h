@@ -1,6 +1,5 @@
 #pragma once
 
-#include <GL/gl3w.h>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -45,7 +44,7 @@ private:
                                     fmt, ##__VA_ARGS__);
 
 namespace Engine {
-inline bool _check_gl_error() {
+/*inline bool _check_gl_error() {
   GLenum err(glGetError());
 
   bool err_occured = err != GL_NO_ERROR;
@@ -77,9 +76,8 @@ inline bool _check_gl_error() {
     err = glGetError();
   }
   return err_occured;
-}
+}*/
 } // namespace Engine
 
 #define LOG_IF_GL_ERR(fmt, ...)  \
-  if(Engine::_check_gl_error())  \
-    LOG_ERROR("GL Error occured at line : %d", __LINE__);
+    LOG_ERROR("GL Error is deprecated : %d", __LINE__);

@@ -64,19 +64,19 @@ public:
     mPerObject = cb;
   }
   void draw(const Application &app, Shader &shader) override {
-    if (mTexture) {
-      glActiveTexture(GL_TEXTURE0);
-      mTexture->bind();
-    }
+    //if (mTexture) {
+    //  glActiveTexture(GL_TEXTURE0);
+    //  mTexture->bind();
+    //}
 
     mPerObject(shader, *mMesh);
-    LOG_IF_GL_ERR();
+    //LOG_IF_GL_ERR();
     mMesh->draw(app);
-    LOG_IF_GL_ERR();
+    //LOG_IF_GL_ERR();
 
-    if (mTexture) {
-      glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    //if (mTexture) {
+     // glBindTexture(GL_TEXTURE_2D, 0);
+    //}
   }
 
 private:
