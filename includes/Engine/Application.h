@@ -53,6 +53,13 @@ protected:
 private:
   GLFWwindow *mWindow;
   VkInstance mInstance;
+  VkDebugUtilsMessengerEXT mDebugMessenger;
+
+  #ifdef NDEBUG
+    const bool enableValidationLayers = false;
+  #else
+    const bool mEnableValidationLayers = true;
+  #endif
 
   void initWindow();
   void initVulkan();
@@ -60,6 +67,7 @@ private:
   void cleanup();
 
   void createInstance();
+  void setupDebugMessenger();
   void centerWindow();
 };
 
