@@ -293,7 +293,7 @@ void Application::createLogicalDevice() {
   } else
     createInfo.enabledLayerCount = 0;
 
-  if (vkCreateDevice(mPhysicalDevice, &createInfo, nullptr, &mDevice) != VK_SUCCESS))
+  if (vkCreateDevice(mPhysicalDevice, &createInfo, nullptr, &mDevice) != VK_SUCCESS)
     throw std::runtime_error("Failed to create logical device.");
 
   vkGetDeviceQueue(mDevice, indices.graphicsFamily.value(), 0, &mGraphicsQueue);
