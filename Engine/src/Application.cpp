@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory>
+#include <optional>
 
 #include <Engine/Application.h>
 
@@ -81,6 +82,35 @@ namespace {
     auto fn = (PFN_vkDestroyDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
     if (fn != nullptr)
         fn(instance, debugMessenger, pAllocator);
+  }
+
+  struct QueueFamilyIndices {
+    std::optional<uint32_t> graphicsFamily;
+
+    auto isComplete() {
+      return graphicsFamily.has_value();
+    }
+  };
+
+  QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {
+    QueueFamilyIndices indices;
+
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> families(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, families.data());
+
+    for (auto i = 0; i < families.size(); i++) {
+      auto family = families[i];
+      if (family.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        indices.graphicsFamily = i;
+
+      if (indices.isComplete())
+        break;
+    }
+
+    return indices;
   }
 }
 
@@ -205,9 +235,75 @@ void Application::setupDebugMessenger() {
   }
 }
 
+void Application::pickPhysicalDevice() {
+  uint32_t deviceCount = 0;
+  vkEnumeratePhysicalDevices(mInstance, &deviceCount, nullptr);
+
+  if (!deviceCount)
+    throw std::runtime_error("Failed to find GPUs supporting Vulkan...");
+
+  std::vector<VkPhysicalDevice> devices(deviceCount);
+  vkEnumeratePhysicalDevices(mInstance, &deviceCount, devices.data());
+
+  // TODO: Be smarter about device choice. We can either score devices
+  // based off some heuristics or simply look for some devices with features
+  // that we want. Maybe the Application can define a list of requirements?
+  auto isDeviceSuitable = [](const VkPhysicalDevice &device) {
+    auto indices = findQueueFamilies(device);
+    return indices.isComplete();
+  };
+
+  for (const auto &device : devices) {
+    if (isDeviceSuitable(device)) {
+      mPhysicalDevice = device;
+      break;
+    }
+  }
+
+  if (mPhysicalDevice == VK_NULL_HANDLE)
+    throw std::runtime_error("Could not find a suitable GPU device...");
+}
+
+void Application::createLogicalDevice() {
+  auto indices = findQueueFamilies(mPhysicalDevice);
+
+  VkDeviceQueueCreateInfo queueCreateInfo{};
+  queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+  queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+  queueCreateInfo.queueCount = 1;
+
+  auto queuePriority = 1.0f;
+  queueCreateInfo.pQueuePriorities = &queuePriority;
+
+  VkPhysicalDeviceFeatures deviceFeatures{};
+
+  VkDeviceCreateInfo createInfo{};
+  createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+  createInfo.pQueueCreateInfos = &queueCreateInfo;
+  createInfo.queueCreateInfoCount = 1;
+  createInfo.pEnabledFeatures = &deviceFeatures;
+
+  // Add validation layer data for compatibility with older
+  // Vulkan implementations.
+  createInfo.enabledExtensionCount = 0;
+
+  if (mEnableValidationLayers) {
+    createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+    createInfo.ppEnabledLayerNames = validationLayers.data();
+  } else
+    createInfo.enabledLayerCount = 0;
+
+  if (vkCreateDevice(mPhysicalDevice, &createInfo, nullptr, &mDevice) != VK_SUCCESS))
+    throw std::runtime_error("Failed to create logical device.");
+
+  vkGetDeviceQueue(mDevice, indices.graphicsFamily.value(), 0, &mGraphicsQueue);
+}
+
 void Application::initVulkan() {
   createInstance();
   setupDebugMessenger();
+  pickPhysicalDevice();
+  createLogicalDevice();
 }
 
 void Application::initEngine() {
@@ -241,6 +337,8 @@ void Application::initEngine() {
 
 void Application::cleanup() {
   //mUIManager.shutdown();
+
+  vkDestroyDevice(mDevice, nullptr);
 
   if (mEnableValidationLayers)
     DestroyDebugUtilsMessengerEXT(mInstance, mDebugMessenger, nullptr);

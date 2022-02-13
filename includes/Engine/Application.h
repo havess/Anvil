@@ -54,9 +54,12 @@ private:
   GLFWwindow *mWindow;
   VkInstance mInstance;
   VkDebugUtilsMessengerEXT mDebugMessenger;
+  VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
+  VkDevice mDevice;
+  VkQueue mGraphicsQueue;
 
   #ifdef NDEBUG
-    const bool enableValidationLayers = false;
+    const bool mEnableValidationLayers = false;
   #else
     const bool mEnableValidationLayers = true;
   #endif
@@ -67,7 +70,17 @@ private:
   void cleanup();
 
   void createInstance();
+  /// When validation layers are supported this function
+  /// will setup the debug messenger callback function that
+  /// will relay the messages to our application instead of
+  /// straight to stdout.
   void setupDebugMessenger();
+  /// This function will pick the graphics card on the system
+  /// to use.
+  void pickPhysicalDevice();
+  /// This function creates a logical device for the physical
+  /// device to interface with.
+  void createLogicalDevice();
   void centerWindow();
 };
 
