@@ -57,6 +57,19 @@ private:
   VkPhysicalDevice mPhysicalDevice = VK_NULL_HANDLE;
   VkDevice mDevice;
   VkQueue mGraphicsQueue;
+  VkQueue mPresentQueue;
+  VkSurfaceKHR mSurface;
+  VkSwapchainKHR mSwapChain;
+  std::vector<VkImage> mSwapChainImages;
+  VkFormat mSwapChainImageFormat;
+  VkExtent2D mSwapChainExtent;
+  std::vector<VkImageView> mSwapChainImageViews;
+
+  struct SwapChainSupportDetails {
+    VkSurfaceCapabilitiesKHR capabilities;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+  };
 
   #ifdef NDEBUG
     const bool mEnableValidationLayers = false;
@@ -81,7 +94,14 @@ private:
   /// This function creates a logical device for the physical
   /// device to interface with.
   void createLogicalDevice();
+  void createSwapChain();
+  void createImageViews();
+  void createSurface();
   void centerWindow();
+  bool isDeviceSuitable(VkPhysicalDevice device);
+  bool checkDeviceExtensionSupport(VkPhysicalDevice device);
+  SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+
 };
 
 } // namespace Engine
