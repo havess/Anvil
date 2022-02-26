@@ -64,6 +64,18 @@ private:
   VkFormat mSwapChainImageFormat;
   VkExtent2D mSwapChainExtent;
   std::vector<VkImageView> mSwapChainImageViews;
+  VkRenderPass mRenderPass;
+  VkPipelineLayout mPipelineLayout;
+  VkPipeline mGraphicsPipeline;
+  std::vector<VkFramebuffer> mSwapChainFramebuffers;
+  VkCommandPool mCommandPool;
+
+  // Vectors to hold the command buffers and sync objects
+  // for each frame in flight.
+  std::vector<VkCommandBuffer> mCommandBuffers;
+  std::vector<VkSemaphore> mImageAvailableSems;
+  std::vector<VkSemaphore> mRenderFinishedSems;
+  std::vector<VkFence> mInFlightFences;
 
   struct SwapChainSupportDetails {
     VkSurfaceCapabilitiesKHR capabilities;
@@ -72,15 +84,20 @@ private:
   };
 
   #ifdef NDEBUG
-    const bool mEnableValidationLayers = false;
+  const bool mEnableValidationLayers = false;
   #else
-    const bool mEnableValidationLayers = true;
+  const bool mEnableValidationLayers = true;
   #endif
+
+  const int mMaxFramesInFlight = 2;
+  uint32_t mCurrentFrame = 0;
+  bool mFramebufferResized = false;
 
   void initWindow();
   void initVulkan();
   void initEngine();
   void cleanup();
+  void cleanupSwapchain();
 
   void createInstance();
   /// When validation layers are supported this function
@@ -97,10 +114,25 @@ private:
   void createSwapChain();
   void createImageViews();
   void createSurface();
+  void createGraphicsPipeline();
+  void createRenderPass();
+  void createFramebuffers();
+  void createCommandPool();
+  void createCommandBuffers();
+  void createSyncObjects();
+
+  void recreateSwapChain();
+
+  void recordCommandBuffer(VkCommandBuffer buf, uint32_t imageInd);
+
+  void drawFrame();
+
   void centerWindow();
   bool isDeviceSuitable(VkPhysicalDevice device);
   bool checkDeviceExtensionSupport(VkPhysicalDevice device);
   SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
+
+  static void framebufferResizeCallback(GLFWwindow *window, int width, int height);
 
 };
 
